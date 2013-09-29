@@ -8,8 +8,8 @@ Use logging decorators to minimize your project code.
 # Configurations
 You can pass your own logger by using python logging module.
 
-It's mandatory to invoke the `@logger.with_logger()` method.  
-Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `@logger.with_logger( my_logger )`.
+It's mandatory to invoke the `logger.with_logger()` method.  
+Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `logger.with_logger( my_logger )`.
 
 Unless you pass your own log, the default python logger is set with it's default formatting.
 
@@ -27,9 +27,11 @@ Supports the same default log levels as the standard python logging library:
 
 ---
 
-## @logger.before(<<l>level>, <<l>Arguments>)
+## Before decorator
 
-Logs information upon invokation of the method.  
+`@logger.before(level, Arguments)`
+
+Logs information upon invocation of the method.  
 Log selected or all input information.
 
 **Arguments**:  
@@ -42,9 +44,11 @@ Log selected or all input information.
 
 ---
 
-## @logger.after(<<l>level>, <<l>Arguments>)
+## After decorator
 
-Logs information upon invokation of the method.
+`@logger.after(level, Arguments>)`
+
+Logs information upon invocation of the method.
 Log selected arguments when the method ends.
 
 **Arguments**:  
@@ -58,24 +62,28 @@ Log selected arguments when the method ends.
 ### Usage Examples:
 BEFORE:  
 ```
-@logger.before( debug, { 0, 1 } ):  
-def somefunc( param1 = value1, param2 = value2 ):  
+@logger.before( logging.debug, "name: (param_1)%d, id: (param_2)%d" ):  
+def somefunc( param_1, param_2 ):  
     pass
 ```
 
-=> prints your formatting options and then:  
-`- {param1: value1, param2: value2}`
+When invoking the `.somefunc()` method, the following line will be written to the log **before** the function's code is executed.  
+
+=> prints your logging formatting options and then:  
+`- {name: John, id: 123456789}`
 
 ---
 
 AFTER:  
 ```
-@logger.after( info, { t, rv } ):  
+@logger.after( logging.info, { t, rv } ):  
 def somefunc( param1, param2 ):  
     return result
 ```
 
-=> prints your formatting options and then:  
+When invoking the `.somefunc()` method, the following line will be written to the log **after** the function's code is executed.  
+
+=> prints your logging formatting options and then:  
 `- {elasped: 2.7 , return: value}`
 
 ---
