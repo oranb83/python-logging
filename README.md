@@ -27,7 +27,7 @@ Supports the same default log levels as the standard python logging library:
 
 ---
 
-## @logger.<<l>level>.before
+## @logger.before(<<l>level>, <<l>Arguments>)
 
 Logs information upon invokation of the method.  
 Log selected or all input information.
@@ -42,7 +42,7 @@ Log selected or all input information.
 
 ---
 
-## @logger.<<l>level>.after
+## @logger.after(<<l>level>, <<l>Arguments>)
 
 Logs information upon invokation of the method.
 Log selected arguments when the method ends.
@@ -58,7 +58,7 @@ Log selected arguments when the method ends.
 ### Usage Examples:
 BEFORE:  
 ```
-@logger.info.before( { 0, 1 } ):  
+@logger.before( debug, { 0, 1 } ):  
 def somefunc( param1 = value1, param2 = value2 ):  
     pass
 ```
@@ -70,7 +70,7 @@ def somefunc( param1 = value1, param2 = value2 ):
 
 AFTER:  
 ```
-@logger.info.before( { t, rv } ):  
+@logger.after( info, { t, rv } ):  
 def somefunc( param1, param2 ):  
     return result
 ```
