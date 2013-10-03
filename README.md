@@ -25,8 +25,6 @@ Supports the same default log levels as the standard python logging library:
 * ERROR  
 * CRITICAL
 
----
-
 ## Before decorator
 
 `@logger.before(level, Arguments)`
@@ -41,8 +39,6 @@ Log selected or all input information.
 * `{2}`: prints the method's *third parameter*, and so on...
 * `{*args}`: prints the **args* of the method.  
 * `{**kwargs}`: prints the ***kwargs* of the method.
-
----
 
 ## After decorator
 
@@ -87,4 +83,3 @@ When invoking the `.somefunc()` method, the following line will be written to th
 `- {elasped: 2.7 , return: value}`
 
 ---
-
