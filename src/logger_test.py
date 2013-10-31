@@ -60,6 +60,25 @@ class TestLogger( unittest.TestCase ):
 		# Assert
 		self.assertIsNotNone( log.logger )
 
+	#
+	
+	def test_before( self ):
+
+		# Arrange
+		log = Logger()
+
+		# Act
+		log.with_logger( logging.getLogger() )
+
+
+		@log.before( logging.INFO, "Leonard", "Sheldon" )
+		def wrapper( function_arg1, function_arg2 ):
+		    print "Done"
+            #print ( "I am the decorated function and only knows about my arguments: {0}"
+		    #       " {1}".format( function_arg1, function_arg2 ) )
+
+		wrapper( "Rajesh", "Howard" )
+	
 
 if __name__ == "__main__":
 	unittest.main()
