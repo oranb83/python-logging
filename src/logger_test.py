@@ -61,7 +61,6 @@ class TestLogger( unittest.TestCase ):
 		self.assertIsNotNone( log.logger )
 
 	#
-	
 	def test_before( self ):
 
 		# Arrange
@@ -71,7 +70,7 @@ class TestLogger( unittest.TestCase ):
 		log.with_logger( logging.getLogger() )
 
 
-		@log.before( logging.INFO, "Leonard", "Sheldon" )
+		@log.before( logging.INFO, "First param: {0}\nSecond param: {1}" )
 		def wrapper( function_arg1, function_arg2 ):
 		    print "Done"
             #print ( "I am the decorated function and only knows about my arguments: {0}"
