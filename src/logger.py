@@ -34,7 +34,7 @@ class Logger:
         print('I make decorators! And I accept arguments:', string)
         attrs = cls._get_unique_params(string)
         print(attrs)
-        print('\nprint( ARGS:')
+        print('\nprint ARGS:')
         for attr, prefix_str in attrs:
             if re.match('({\d+})', attr):
                 cls._print_param(attr, prefix_str)
