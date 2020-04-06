@@ -60,8 +60,8 @@ class TestLogger(unittest.TestCase):
 		@log.before(logging.INFO, 'First param: {0}\nSecond param: {1}')
 		def wrapper(function_arg1, function_arg2):
 		    print('Done')
-            #print( ('I am the decorated function and only knows about my arguments: {0}'
-		    #       ' {1}'.format(function_arg1, function_arg2))
+            #print('I am the decorated function and only knows about my arguments: {0}'
+		    #      ' {1}'.format(function_arg1, function_arg2)
 
 		wrapper('Rajesh', 'Howard')
 
