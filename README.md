@@ -1,4 +1,4 @@
-python_logging
+python_logging - WIP (work in progress)
 ==============
 
 Use logging decorators to minimize your project code.
@@ -8,10 +8,10 @@ Use logging decorators to minimize your project code.
 # Configurations
 You can pass your own logger by using python logging module.
 
-It's mandatory to invoke the `logger.with_logger()` method.
-Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `logger.with_logger(my_logger)`.
+It's mandatory to invoke the `logger` setter.
+Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `Logger().logger` = <myLogger>. Examples are in the logger_test.py file
 
-Unless you pass your own log, the default python logger is set with it's default formatting.
+Unless you pass your own log, the default python logger is set with it's default formatting which is no formating - it's recommended to change it.
 
 ---
 

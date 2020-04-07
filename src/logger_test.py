@@ -17,7 +17,7 @@ class TestLogger(unittest.TestCase):
 		log = Logger()
 
 		# Act
-		log._logger = logging.Logger('test')
+		log.logger = logging.Logger('test')
 
 		# Assert
 		self.assertIsNotNone(log.logger)
@@ -29,15 +29,10 @@ class TestLogger(unittest.TestCase):
 		expected = log._default_logger()
 
 		# Act
-		log.with_logger()
+		log.logger = None
 
 		# Assert
 		self.assertEqual(expected, log.logger)
-
-	def test_with_logger_wrong_obj(self):
-		"""Set a None logger object"""
-		# Assert
-		self.assertRaises(ValueError, Logger().with_logger, 'test')
 
 	def test_with_logger(self):
 		"""Set a logger object"""
@@ -45,7 +40,7 @@ class TestLogger(unittest.TestCase):
 		log = Logger()
 
 		# Act
-		log.with_logger(logging.getLogger())
+		log.logger = logging.getLogger()
 
 		# Assert
 		self.assertIsNotNone(log.logger)
@@ -53,17 +48,17 @@ class TestLogger(unittest.TestCase):
 	def test_before(self):
 		# Arrange
 		log = Logger()
+		log.logger = None
+		@log.before(logging.INFO)
+		def test(a, b=5, c='foo-bar', *args, **kwargs):
+		    pass
 
 		# Act
-		log.with_logger(logging.getLogger())
-
-		@log.before(logging.INFO, 'First param: {0}\nSecond param: {1}')
-		def wrapper(function_arg1, function_arg2):
-		    print('Done')
-            #print('I am the decorated function and only knows about my arguments: {0}'
-		    #      ' {1}'.format(function_arg1, function_arg2)
-
-		wrapper('Rajesh', 'Howard')
+		test('Rajesh', 'Howard')
+		test(1)
+		test(1, 2)
+		test(1, d='hello')
+		test(1, 2, 3, 4, 5, f='hello', g='world')
 
 
 if __name__ == '__main__':
