@@ -160,7 +160,7 @@ class Logger:
         """
         Log all the method arguments and output.
 
-        Use for methods that have outputs and you wish to log them.
+        Use for methods that have both inputs and outputs and you wish to log them.
         Usage:
             log = Logger()
             log.logger_input = None  # or a custom logger (this uses the default)
