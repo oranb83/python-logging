@@ -2,7 +2,6 @@ import os
 import time
 import inspect
 import logging
-from copy import deepcopy
 
 FORMAT = ''
 LOG_LEVEL = os.getenv('LOG_LEVEL', logging.getLevelName(logging.DEBUG))
