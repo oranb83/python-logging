@@ -1,39 +1,65 @@
 import os
 import inspect
 import logging
-from functools import wraps
+from copy import deepcopy
 
 FORMAT = ''
 LOG_LEVEL = os.getenv('LOG_LEVEL', logging.getLevelName(logging.DEBUG))
+DEFAUL_OUTPUT_NAME = 'output'
 
 logging.basicConfig(level=getattr(logging, LOG_LEVEL), format=FORMAT)
 
 
 class Logger:
     """
-    Advanced Logger using decorator to log ops before and after methods
+    Advanced Logger using decorator to log ops before and after methods.
     """
-    _logger = None
+    _logger_input = None
+    _logger_output = None
 
     @property
-    def logger(self):
+    def logger_input(self):
         """
-        Gets the logger property, if the .with_logger() method was invoked,
-        Otherwise raise an Exception.
+        Gets the logger property, if the .with_logger() method was
+        invoked, otherwise raise an Exception.
         """
-        if self._logger is not None:
-            return self._logger
+        if self._logger_input is not None:
+            return self._logger_input
 
         # TODO: create my own custom exceptions, inhereted from class Exception
         raise Exception('Invoke logger.setter to set your log')
 
-    @logger.setter
-    def logger(self, log=None):
-        """Setter for the logger property, use None for default."""
+    @logger_input.setter
+    def logger_input(self, log=None):
+        """
+        Setter for the logger property, use None for default.
+        """
         if not (log is None or isinstance(log, logging.Logger)):
             raise ValueError('`log` must be a Logger object or None')
 
-        self._logger = log if log is not None else self._default_logger()
+        self._logger_input = log if log is not None else self._default_logger()
+
+    @property
+    def logger_output(self):
+        """
+        Gets the logger property, if the .with_logger() method was
+        invoked, otherwise raise an Exception.
+        """
+        if self._logger_output is not None:
+            return self._logger_output
+
+        # TODO: create my own custom exceptions, inhereted from class Exception
+        raise Exception('Invoke logger.setter to set your log')
+
+    @logger_output.setter
+    def logger_output(self, log=None):
+        """
+        Setter for the logger property, use None for default.
+        """
+        if not (log is None or isinstance(log, logging.Logger)):
+            raise ValueError('`log` must be a Logger object or None')
+
+        self._logger_output = log if log is not None else self._default_logger()
 
     def _default_logger(self):
         return logging.getLogger()
@@ -50,9 +76,76 @@ class Logger:
             # If you are not comfortable with closures, you can assume it's ok,
             # or read: http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python
             def wrapper(*args, **kwargs):
+                kwargs.pop('output_names', None)
                 func_args = inspect.signature(func).bind(*args, **kwargs).arguments
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in func_args.items())
-                self.logger.log(level, func_args_str)
+                self.logger_input.log(level, func_args_str)
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        return dump_args
+
+    def after(self, level):
+        """
+        Log all the method output.
+        """
+        def dump_args(func):
+            """
+            Decorator to print function call details - output names and effective values.
+            """
+            # The ability to pass arguments here is a gift from closures.
+            # If you are not comfortable with closures, you can assume it's ok,
+            # or read: http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python
+            def wrapper(*args, **kwargs):
+                func_args = inspect.signature(func).bind(*args, **kwargs).arguments
+                func_output_keys = func_args.get('kwargs', {}).get('output_names')
+                func_output_values = func(*args, **kwargs)
+                if not isinstance(func_output_values, tuple):
+                    func_output_values = (func_output_values,)
+                if func_output_keys is None:
+                    func_output_keys = [
+                        f'{DEFAUL_OUTPUT_NAME}_{i}' for i in range(1, len(func_output_values) + 1)]
+                elif len(func_output_keys) != len(func_output_values):
+                    raise ValueError(f'Expected {len(func_output_keys)} output_names, '
+                                     f'but {len(func_output_values)} output_names were provided')
+                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(func_output_keys, func_output_values))
+                self.logger_output.log(level, func_args_str)
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        return dump_args
+
+    def before_and_after(self, level):
+        """
+        Log all the method arguments and output.
+        """
+        def dump_args(func):
+            """
+            Decorator to print function call details - input names and
+            output names and effective values.
+            """
+            # The ability to pass arguments here is a gift from closures.
+            # If you are not comfortable with closures, you can assume it's ok,
+            # or read: http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python
+            def wrapper(*args, **kwargs):
+                func_output_keys = kwargs.pop('output_names', None)
+                func_args = inspect.signature(func).bind(*args, **kwargs).arguments
+                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in func_args.items())
+                self.logger_input.log(level, func_args_str)
+
+                func_output_values = func(*args, **kwargs)
+                if not isinstance(func_output_values, tuple):
+                    func_output_values = (func_output_values,)
+                if func_output_keys is None:
+                    func_output_keys = [
+                        f'{DEFAUL_OUTPUT_NAME}_{i}' for i in range(1, len(func_output_values) + 1)]
+                elif len(func_output_keys) != len(func_output_values):
+                    raise ValueError(f'Expected {len(func_output_keys)} output_names, '
+                                     f'but {len(func_output_values)} output_names were provided')
+                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(func_output_keys, func_output_values))
+                self.logger_output.log(level, func_args_str)
                 return func(*args, **kwargs)
 
             return wrapper
