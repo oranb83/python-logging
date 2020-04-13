@@ -1,78 +1,32 @@
 import os
-import time
 import inspect
 import logging
 
-FORMAT = ''
-LOG_LEVEL = os.getenv('LOG_LEVEL', logging.getLevelName(logging.DEBUG))
 DEFAUL_OUTPUT_NAME = 'output'
 
-logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
+logging.basicConfig(format='', level=logging.DEBUG)
 
 
 class Logger:
     """
     Advanced Logger using decorator to log ops before and after methods.
     """
-    _logger_input = None
-    _logger_output = None
+    def __init__(self, input_dir, output_dir=None):
+        self.input_dir = input_dir
+        # If the output_dir is not passes, we will use the same directory for both input and ouput
+        self.output_dir = output_dir if output_dir is not None else input_dir
+        # Generate input and output directories if they are missing
+        os.makedirs(self.input_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    @property
-    def logger_input(self):
-        """
-        Gets the logger property, if the .with_logger() method was
-        invoked, otherwise raise an Exception.
-        """
-        if self._logger_input is not None:
-            return self._logger_input
-
-        # TODO: create my own custom exceptions, inhereted from class Exception
-        raise Exception('Invoke logger.setter to set your log')
-
-    @logger_input.setter
-    def logger_input(self, log=None):
-        """
-        Setter for the logger property, use None for default.
-        """
-        if not (log is None or isinstance(log, logging.Logger)):
-            raise ValueError('`log` must be a Logger object or None')
-
-        self._logger_input = log if log is not None else self._default_logger('inputs')
-
-    @property
-    def logger_output(self):
-        """
-        Gets the logger property, if the .with_logger() method was
-        invoked, otherwise raise an Exception.
-        """
-        if self._logger_output is not None:
-            return self._logger_output
-
-        # TODO: create my own custom exceptions, inhereted from class Exception
-        raise Exception('Invoke logger.setter to set your log')
-
-    @logger_output.setter
-    def logger_output(self, log=None):
-        """
-        Setter for the logger property, use None for default.
-        """
-        if not (log is None or isinstance(log, logging.Logger)):
-            raise ValueError('`log` must be a Logger object or None')
-
-        self._logger_output = log if log is not None else self._default_logger('outputs')
-
-    def _default_logger(self, filename):
-        return logging.getLogger(f'{filename}_{time.strftime("%Y%m%d-%H%M%S")}.txt')
-
-    def before(self, level):
+    def before(self):
         """
         Log all the method arguments.
 
         Use for methods that have arguments and you wish to log them.
         Usage:
-            log = Logger()
-            log.logger_input = None  # or a custom logger (this uses the default)
-            @log.before(logging.INFO)
+            log = Logger('inputs', 'outputs') -> directories to save the logs
+            @log.before()
             def test(a, b=5, c='foo-bar', *args, **kwargs):
                 pass
 
@@ -97,22 +51,24 @@ class Logger:
                 kwargs.pop('output_names', None)
                 func_args = inspect.signature(func).bind(*args, **kwargs).arguments
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in func_args.items())
-                self.logger_input.log(level, func_args_str)
+                logger = logging.getLogger('before')
+                logger.addHandler(
+                    logging.FileHandler(filename=f'{self.input_dir}/{func.__name__}_inputs.txt'))
+                logger.info(func_args_str)
                 return func(*args, **kwargs)
 
             return wrapper
 
         return dump_args
 
-    def after(self, level):
+    def after(self):
         """
         Log all the method output.
 
         Use for methods that have outputs and you wish to log them.
         Usage:
-            log = Logger()
-            log.logger_output = None  # or a custom logger (this uses the default)
-            @log.after(logging.INFO)
+            log = Logger('inputs', 'outputs') -> directories to save the logs
+            @log.after()
             def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
                 return 1, ['foo', 'bar'], 'hello'
 
@@ -149,23 +105,24 @@ class Logger:
                                      f'but {len(func_output_values)} output_names were provided')
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(
                     func_output_keys, func_output_values))
-                self.logger_output.log(level, func_args_str)
+                logger = logging.getLogger('after')
+                logger.addHandler(
+                    logging.FileHandler(filename=f'{self.output_dir}/{func.__name__}_outputs.txt'))
+                logger.info(func_args_str)
                 return func(*args, **kwargs)
 
             return wrapper
 
         return dump_args
 
-    def before_and_after(self, level):
+    def before_and_after(self):
         """
         Log all the method arguments and output.
 
         Use for methods that have both inputs and outputs and you wish to log them.
         Usage:
-            log = Logger()
-            log.logger_input = None  # or a custom logger (this uses the default)
-            log.logger_output = None  # or a custom logger (this uses the default)
-            @log.before_and_after(logging.INFO)
+            log = Logger('inputs', 'outputs') -> directories to save the logs
+            @log.before_and_after()
             def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
                 return 1, ['foo', 'bar'], 'hello'
 
@@ -182,7 +139,7 @@ class Logger:
         @note: all other positional arguments will be under args or kwargs keys
         @note: if output_names is missing or None, the output keys will be:
                <DEFAUL_OUTPUT_NAME>_<index>
-        @note: prints to stdout and filename (defaulted to inputs_<datetime>.txt / outputs_<datetime>.txt)
+        @note: prints to stdout and filename (defaulted to inputs.txt / outputs.txt)
         @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
@@ -198,7 +155,10 @@ class Logger:
                 func_output_keys = kwargs.pop('output_names', None)
                 func_args = inspect.signature(func).bind(*args, **kwargs).arguments
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in func_args.items())
-                self.logger_input.log(level, func_args_str)
+                logger = logging.getLogger('before')
+                logger.addHandler(
+                    logging.FileHandler(filename=f'{self.input_dir}/{func.__name__}_inputs.txt'))
+                logger.info(func_args_str)
 
                 # print output
                 func_output_values = func(*args, **kwargs)
@@ -212,7 +172,10 @@ class Logger:
                                      f'but {len(func_output_values)} output_names were provided')
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(
                     func_output_keys, func_output_values))
-                self.logger_output.log(level, func_args_str)
+                logger = logging.getLogger('after')
+                logger.addHandler(
+                    logging.FileHandler(filename=f'{self.output_dir}/{func.__name__}_outputs.txt'))
+                logger.info(func_args_str)
                 return func(*args, **kwargs)
 
             return wrapper

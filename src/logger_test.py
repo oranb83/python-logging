@@ -6,86 +6,53 @@ from logger import Logger
 
 class TestLogger(unittest.TestCase):
 
-    def test_logger_not_set(self):
-    	"""A logger object was not set"""
-    	# Assert
-    	self.assertRaises(Exception, lambda: Logger().logger)
-
-    def test_logger_set(self):
-    	"""A logger object was set"""
-    	# Arrange
-    	log = Logger()
-
-    	# Act
-    	log.logger_input = logging.Logger('test')
-
-    	# Assert
-    	self.assertIsNotNone(log.logger_input)
-
-    def test_with_logger_default(self):
-    	"""Set a default logger"""
-    	# Arrange
-    	log = Logger()
-    	expected = log._default_logger('inputs')
-
-    	# Act
-    	log.logger_input = None
-
-    	# Assert
-    	self.assertEqual(expected, log.logger_input)
-
-    def test_with_logger(self):
-    	"""Set a logger object"""
-    	# Arrange
-    	log = Logger()
-
-    	# Act
-    	log.logger_input = logging.getLogger()
-
-    	# Assert
-    	self.assertIsNotNone(log.logger_input)
-
     def test_before(self):
-    	# Arrange
-    	log = Logger()
-    	log.logger_input = None
-    	@log.before(logging.INFO)
-    	def test(a, b=5, c='foo-bar', *args, **kwargs):
-    	    pass
+        # Arrange
+        log = Logger('test/inputs', 'test/outputs')
+        @log.before()
+        def test(a, b=5, c='foo-bar', *args, **kwargs):
+            pass
+        @log.before()
+        def test1(a, b=5, c='foo-bar', *args, **kwargs):
+            pass
 
-    	# Act
-    	test('foo', 'bar')
-    	test(1)
-    	test(1, 2)
-    	test(1, d='hello', output_names=['1'])
-    	test(1, 2, 3, 4, 5, f='hello', g='world')
+        # Act
+        test('foo', 'bar')
+        test1(1)
+        test(1, 2)
+        test(1, d='hello', output_names=['1'])
+        test(1, 2, 3, 4, 5, f='hello', g='world')
 
     def test_after(self):
         # Arrange
-        log = Logger()
-        log.logger_output = None
-        @log.after(logging.INFO)
+        log = Logger('test/inputs', 'test/outputs')
+        @log.after()
         def test(a, b=5, c='foo-bar', *args, **kwargs):
+            return ['out_1'], 'out_2', 1
+        @log.after()
+        def test2(a, b=5, c='foo-bar', *args, **kwargs):
             return ['out_1'], 'out_2', 1
 
         # Act
         test('foo', 'bar')
-        test('foo', 'bar', output_names=['out1', 'out2', 'out3'])
+        test2('foo', 'bar', output_names=['out1', 'out2', 'out3'])
         self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1'])
         self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1', '2', '3', '4'])
 
     def test_before_and_after(self):
         # Arrange
-        log = Logger()
-        log.logger_input = None
-        log.logger_output = None
-        @log.before_and_after(logging.INFO)
+        log = Logger('test/inputs', 'test/outputs')
+        @log.before_and_after()
         def test(a, b=5, c='foo-bar', *args, **kwargs):
+            return ['out_1'], 'out_2', 1
+
+        @log.before_and_after()
+        def test3(a, b=5, c='foo-bar', *args, **kwargs):
             return ['out_1'], 'out_2', 1
 
         # Act
         test('foo', x='bar')
-        test(1, d='hello')
+        test3(1, d='hello')
         test(1, 2, 3, 4, 5, f='hello', g='world')
         test('foo', 'bar', output_names=['out1', 'out2', 'out3'])
         self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1'])
