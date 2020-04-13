@@ -163,6 +163,7 @@ class Logger:
         Use for methods that have outputs and you wish to log them.
         Usage:
             log = Logger()
+            log.logger_input = None  # or a custom logger (this uses the default)
             log.logger_output = None  # or a custom logger (this uses the default)
             @log.before_and_after(logging.INFO)
             def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
