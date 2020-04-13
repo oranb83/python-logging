@@ -112,7 +112,7 @@ class Logger:
         Usage:
             log = Logger()
             log.logger_output = None  # or a custom logger (this uses the default)
-            @log.before(logging.INFO)
+            @log.after(logging.INFO)
             def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
                 return 1, ['foo', 'bar'], 'hello'
 
@@ -164,7 +164,7 @@ class Logger:
         Usage:
             log = Logger()
             log.logger_output = None  # or a custom logger (this uses the default)
-            @log.before(logging.INFO)
+            @log.before_and_after(logging.INFO)
             def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
                 return 1, ['foo', 'bar'], 'hello'
 
@@ -181,7 +181,7 @@ class Logger:
         @note: all other positional arguments will be under args or kwargs keys
         @note: if output_names is missing or None, the output keys will be:
                <DEFAUL_OUTPUT_NAME>_<index>
-        @note: prints to stdout and filename (defaulted to outputs_<datetime>.txt)
+        @note: prints to stdout and filename (defaulted to inputs_<datetime>.txt / outputs_<datetime>.txt)
         @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
