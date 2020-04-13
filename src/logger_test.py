@@ -1,83 +1,96 @@
-import unittest
 import logging
+import unittest
 
 from logger import Logger
 
-##
-class TestLogger( unittest.TestCase ):
 
-	#
-	def test_logger_not_set( self ):
-		""" A logger object was not set """
+class TestLogger(unittest.TestCase):
 
-		# Assert
-		self.assertRaises( Exception, lambda: Logger().logger )
+    def test_logger_not_set(self):
+    	"""A logger object was not set"""
+    	# Assert
+    	self.assertRaises(Exception, lambda: Logger().logger)
 
-	#
-	def test_logger_set( self ):
-		""" A logger object was set """
+    def test_logger_set(self):
+    	"""A logger object was set"""
+    	# Arrange
+    	log = Logger()
 
-		# Arrange
-		log = Logger()
+    	# Act
+    	log.logger_input = logging.Logger('test')
 
-		# Act
-		log._logger = logging.Logger( "test" )
+    	# Assert
+    	self.assertIsNotNone(log.logger_input)
 
-		# Assert
-		self.assertIsNotNone( log.logger )
+    def test_with_logger_default(self):
+    	"""Set a default logger"""
+    	# Arrange
+    	log = Logger()
+    	expected = log._default_logger('inputs')
 
-	#
-	def test_with_logger_default( self ):
-		""" Set a default logger """
+    	# Act
+    	log.logger_input = None
 
-		# Arrange
-		log = Logger()
-		expected = log._default_logger()
+    	# Assert
+    	self.assertEqual(expected, log.logger_input)
 
-		# Act
-		log.with_logger()
+    def test_with_logger(self):
+    	"""Set a logger object"""
+    	# Arrange
+    	log = Logger()
 
-		# Assert
-		self.assertEqual( expected, log.logger )
+    	# Act
+    	log.logger_input = logging.getLogger()
 
-	#
-	def test_with_logger_wrong_obj( self ):
-		""" Set a None logger object """
+    	# Assert
+    	self.assertIsNotNone(log.logger_input)
 
-		# Assert
-		self.assertRaises( ValueError, Logger().with_logger, "test" )
+    def test_before(self):
+    	# Arrange
+    	log = Logger()
+    	log.logger_input = None
+    	@log.before(logging.INFO)
+    	def test(a, b=5, c='foo-bar', *args, **kwargs):
+    	    pass
 
-	#
-	def test_with_logger( self ):
-		""" Set a logger object """
+    	# Act
+    	test('foo', 'bar')
+    	test(1)
+    	test(1, 2)
+    	test(1, d='hello', output_names=['1'])
+    	test(1, 2, 3, 4, 5, f='hello', g='world')
 
-		# Arrange
-		log = Logger()
+    def test_after(self):
+        # Arrange
+        log = Logger()
+        log.logger_output = None
+        @log.after(logging.INFO)
+        def test(a, b=5, c='foo-bar', *args, **kwargs):
+            return ['out_1'], 'out_2', 1
 
-		# Act
-		log.with_logger( logging.getLogger() )
+        # Act
+        test('foo', 'bar')
+        test('foo', 'bar', output_names=['out1', 'out2', 'out3'])
+        self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1'])
+        self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1', '2', '3', '4'])
 
-		# Assert
-		self.assertIsNotNone( log.logger )
+    def test_before_and_after(self):
+        # Arrange
+        log = Logger()
+        log.logger_input = None
+        log.logger_output = None
+        @log.before_and_after(logging.INFO)
+        def test(a, b=5, c='foo-bar', *args, **kwargs):
+            return ['out_1'], 'out_2', 1
 
-	#
-	def test_before( self ):
+        # Act
+        test('foo', x='bar')
+        test(1, d='hello')
+        test(1, 2, 3, 4, 5, f='hello', g='world')
+        test('foo', 'bar', output_names=['out1', 'out2', 'out3'])
+        self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1'])
+        self.assertRaises(ValueError, test, 'foo', 'bar', output_names=['1', '2', '3', '4'])
 
-		# Arrange
-		log = Logger()
 
-		# Act
-		log.with_logger( logging.getLogger() )
-
-
-		@log.before( logging.INFO, "First param: {0}\nSecond param: {1}" )
-		def wrapper( function_arg1, function_arg2 ):
-		    print "Done"
-            #print ( "I am the decorated function and only knows about my arguments: {0}"
-		    #       " {1}".format( function_arg1, function_arg2 ) )
-
-		wrapper( "Rajesh", "Howard" )
-	
-
-if __name__ == "__main__":
-	unittest.main()
+if __name__ == '__main__':
+    unittest.main()

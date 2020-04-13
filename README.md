@@ -1,4 +1,4 @@
-python_logging
+python_logging - WIP (work in progress)
 ==============
 
 Use logging decorators to minimize your project code.
@@ -8,37 +8,37 @@ Use logging decorators to minimize your project code.
 # Configurations
 You can pass your own logger by using python logging module.
 
-It's mandatory to invoke the `logger.with_logger()` method.  
-Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `logger.with_logger( my_logger )`.
+It's mandatory to invoke the `logger` setter.
+Enabling your own logger is possible by invoking this method with your logger object at the beginning of the .py file, e.g. `Logger().logger` = <myLogger>. Examples are in the logger_test.py file
 
-Unless you pass your own log, the default python logger is set with it's default formatting.
+Unless you pass your own log, the default python logger is set with it's default formatting which is no formating - it's recommended to change it.
 
 ---
 
 # Possible Log Levels
 
-Supports the same default log levels as the standard python logging library:  
+Supports the same default log levels as the standard python logging library:
 
-* DEBUG  
-* INFO  
-* WARNING  
-* ERROR  
+* DEBUG
+* INFO
+* WARNING
+* ERROR
 * CRITICAL
 
 ## Before decorator
 
 `@logger.before(level, Arguments)`
 
-Logs information upon invocation of the method.  
+Logs information upon invocation of the method.
 Log selected or all input information.
 
-**Arguments**:  
+**Arguments**:
 
-* `{0}`: prints the method's *first parameter*, usually *self*.  
-* `{1}`: prints the method's *second parameter*.  
-* `{2}`: prints the method's *third parameter*, and so on...
-* `{*args}`: prints the **args* of the method.  
-* `{**kwargs}`: prints the ***kwargs* of the method.
+* `{0}`: print(s the method's *first parameter*, usually *self*.
+* `{1}`: print(s the method's *second parameter*.
+* `{2}`: print(s the method's *third parameter*, and so on...
+* `{*args}`: print(s the **args* of the method.
+* `{**kwargs}`: print(s the ***kwargs* of the method.
 
 ## After decorator
 
@@ -47,39 +47,39 @@ Log selected or all input information.
 Logs information upon invocation of the method.
 Log selected arguments when the method ends.
 
-**Arguments**:  
+**Arguments**:
 
-* `{t}`: prints the method's *run time* in seconds.
-* `{rv}`: prints the method's *return* value.
-* `{exc}`: prints *uncaught exceptions* with log level error.
+* `{t}`: print(s the method's *run time* in seconds.
+* `{rv}`: print(s the method's *return* value.
+* `{exc}`: print(s *uncaught exceptions* with log level error.
 
 ---
 
 ### Usage Examples:
-BEFORE:  
+BEFORE:
 ```
-@logger.before( logging.debug, "name: (param_1)%d, id: (param_2)%d" ):  
-def somefunc( param_1, param_2 ):  
+@logger.before(logging.debug, "name: (param_1)%d, id: (param_2)%d"):
+def somefunc(param_1, param_2):
     pass
 ```
 
-When invoking the `.somefunc()` method, the following line will be written to the log **before** the function's code is executed.  
+When invoking the `.somefunc()` method, the following line will be written to the log **before** the function's code is executed.
 
-=> prints your logging formatting options and then:  
+=> print(s your logging formatting options and then:
 `- {name: John, id: 123456789}`
 
 ---
 
-AFTER:  
+AFTER:
 ```
-@logger.after( logging.info, { t, rv } ):  
-def somefunc( param1, param2 ):  
+@logger.after(logging.info, { t, rv }):
+def somefunc(param1, param2):
     return result
 ```
 
-When invoking the `.somefunc()` method, the following line will be written to the log **after** the function's code is executed.  
+When invoking the `.somefunc()` method, the following line will be written to the log **after** the function's code is executed.
 
-=> prints your logging formatting options and then:  
+=> print(s your logging formatting options and then:
 `- {elasped: 2.7 , return: value}`
 
 ---
