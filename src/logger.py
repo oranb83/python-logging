@@ -38,7 +38,7 @@ class Logger:
             c : {'k': 1}
 
         @note: all other positional arguments will be under args or kwargs keys
-        @note: prints to stdout and filename (defaulted to inputs_<datetime>.txt)
+        @note: prints to stdout and filename (defaulted to <input_dir>/<func_name>_inputs.txt)
         """
         def dump_args(func):
             """
@@ -81,7 +81,7 @@ class Logger:
 
         @note: if output_names is missing or None, the output keys will be:
                <DEFAUL_OUTPUT_NAME>_<index>
-        @note: prints to stdout and filename (defaulted to outputs_<datetime>.txt)
+        @note: prints to stdout and filename (defaulted to <output_dir>/<func_name>_outputs.txt)
         @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
@@ -139,7 +139,10 @@ class Logger:
         @note: all other positional arguments will be under args or kwargs keys
         @note: if output_names is missing or None, the output keys will be:
                <DEFAUL_OUTPUT_NAME>_<index>
-        @note: prints to stdout and filename (defaulted to inputs.txt / outputs.txt)
+        @note: prints to stdout and filename (defaulted to:
+            1. <input_dir>/<func_name>_inputs.txt
+            2. <output_dir>/<func_name>_outputs.txt
+        )
         @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
