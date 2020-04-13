@@ -1,4 +1,5 @@
 import os
+import time
 import inspect
 import logging
 from copy import deepcopy
@@ -7,8 +8,7 @@ FORMAT = ''
 LOG_LEVEL = os.getenv('LOG_LEVEL', logging.getLevelName(logging.DEBUG))
 DEFAUL_OUTPUT_NAME = 'output'
 
-logging.basicConfig(level=getattr(logging, LOG_LEVEL), format=FORMAT)
-
+logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
 
 class Logger:
     """
@@ -37,7 +37,7 @@ class Logger:
         if not (log is None or isinstance(log, logging.Logger)):
             raise ValueError('`log` must be a Logger object or None')
 
-        self._logger_input = log if log is not None else self._default_logger()
+        self._logger_input = log if log is not None else self._default_logger('inputs')
 
     @property
     def logger_output(self):
@@ -59,10 +59,10 @@ class Logger:
         if not (log is None or isinstance(log, logging.Logger)):
             raise ValueError('`log` must be a Logger object or None')
 
-        self._logger_output = log if log is not None else self._default_logger()
+        self._logger_output = log if log is not None else self._default_logger('outputs')
 
-    def _default_logger(self):
-        return logging.getLogger()
+    def _default_logger(self, filename):
+        return logging.getLogger(f'{filename}_{time.strftime("%Y%m%d-%H%M%S")}.txt')
 
     def before(self, level):
         """
@@ -109,7 +109,8 @@ class Logger:
                 elif len(func_output_keys) != len(func_output_values):
                     raise ValueError(f'Expected {len(func_output_keys)} output_names, '
                                      f'but {len(func_output_values)} output_names were provided')
-                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(func_output_keys, func_output_values))
+                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(
+                    func_output_keys, func_output_values))
                 self.logger_output.log(level, func_args_str)
                 return func(*args, **kwargs)
 
@@ -130,11 +131,13 @@ class Logger:
             # If you are not comfortable with closures, you can assume it's ok,
             # or read: http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python
             def wrapper(*args, **kwargs):
+                # print arguments
                 func_output_keys = kwargs.pop('output_names', None)
                 func_args = inspect.signature(func).bind(*args, **kwargs).arguments
                 func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in func_args.items())
                 self.logger_input.log(level, func_args_str)
 
+                # print output
                 func_output_values = func(*args, **kwargs)
                 if not isinstance(func_output_values, tuple):
                     func_output_values = (func_output_values,)
@@ -144,7 +147,8 @@ class Logger:
                 elif len(func_output_keys) != len(func_output_values):
                     raise ValueError(f'Expected {len(func_output_keys)} output_names, '
                                      f'but {len(func_output_values)} output_names were provided')
-                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(func_output_keys, func_output_values))
+                func_args_str = '\n'.join('{} : {!r}'.format(*item) for item in zip(
+                    func_output_keys, func_output_values))
                 self.logger_output.log(level, func_args_str)
                 return func(*args, **kwargs)
 
