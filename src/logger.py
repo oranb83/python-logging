@@ -67,6 +67,24 @@ class Logger:
     def before(self, level):
         """
         Log all the method arguments.
+
+        Use for methods that have arguments and you wish to log them.
+        Usage:
+            log = Logger()
+            log.logger_input = None  # or a custom logger (this uses the default)
+            @log.before(logging.INFO)
+            def test(a, b=5, c='foo-bar', *args, **kwargs):
+                pass
+
+            test(['foo'], b=7, c={'k': 1})
+
+        output will be:
+            a : ['foo']
+            b : 7
+            c : {'k': 1}
+
+        @note: all other positional arguments will be under args or kwargs keys
+        @note: prints to stdout and filename (defaulted to inputs_<datetime>.txt)
         """
         def dump_args(func):
             """
@@ -89,6 +107,26 @@ class Logger:
     def after(self, level):
         """
         Log all the method output.
+
+        Use for methods that have outputs and you wish to log them.
+        Usage:
+            log = Logger()
+            log.logger_output = None  # or a custom logger (this uses the default)
+            @log.before(logging.INFO)
+            def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
+                return 1, ['foo', 'bar'], 'hello'
+
+            test(['foo'], b=7, c={'k': 1})
+
+        output will be:
+            o1 : 1
+            o2 : ['foo', 'bar']
+            o3 : 'hello'
+
+        @note: if output_names is missing or None, the output keys will be:
+               <DEFAUL_OUTPUT_NAME>_<index>
+        @note: prints to stdout and filename (defaulted to outputs_<datetime>.txt)
+        @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
             """
@@ -121,6 +159,30 @@ class Logger:
     def before_and_after(self, level):
         """
         Log all the method arguments and output.
+
+        Use for methods that have outputs and you wish to log them.
+        Usage:
+            log = Logger()
+            log.logger_output = None  # or a custom logger (this uses the default)
+            @log.before(logging.INFO)
+            def test(a, b=5, c='foo-bar', output_names=['o1, o2, o3'], *args, **kwargs):
+                return 1, ['foo', 'bar'], 'hello'
+
+            test(['foo'], b=7, c={'k': 1})
+
+        output will be:
+            a : ['foo']
+            b : 7
+            c : {'k': 1}
+            o1 : 1
+            o2 : ['foo', 'bar']
+            o3 : 'hello'
+
+        @note: all other positional arguments will be under args or kwargs keys
+        @note: if output_names is missing or None, the output keys will be:
+               <DEFAUL_OUTPUT_NAME>_<index>
+        @note: prints to stdout and filename (defaulted to outputs_<datetime>.txt)
+        @raise: ValueError in case of wrong amount of output_names supplied.
         """
         def dump_args(func):
             """
