@@ -10,6 +10,7 @@ DEFAUL_OUTPUT_NAME = 'output'
 
 logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
 
+
 class Logger:
     """
     Advanced Logger using decorator to log ops before and after methods.
