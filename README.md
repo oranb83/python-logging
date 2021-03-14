@@ -1,4 +1,4 @@
-python_logging
+python-logging
 ==============
 
 Use logging decorators to minimize your project code.
